@@ -3,6 +3,7 @@ package com.cydeo.service.impl;
 import com.cydeo.enums.AccountType;
 import com.cydeo.exception.AccountOwnershipException;
 import com.cydeo.exception.BadRequestException;
+import com.cydeo.exception.BalanceNotSufficentException;
 import com.cydeo.model.Account;
 import com.cydeo.model.Transaction;
 import com.cydeo.repository.AccountRepository;
@@ -33,9 +34,26 @@ public class TransactionServiceImpl implements TransactionService {
 
         validateAccount(sender, receiver);
         checkAccountOwnership(sender, receiver);
+        executeBalanceAndUpdateIfRequired(amount, sender, receiver);
 
         //make transfer
         return null;
+    }
+
+    private void executeBalanceAndUpdateIfRequired(BigDecimal amount, Account sender, Account receiver) {
+        if (checkSenderBalance(sender, amount)) {
+            //update sender & receiver balance
+            sender.setBalance(sender.getBalance().subtract(amount));
+            receiver.setBalance(receiver.getBalance().add(amount));
+        } else {
+            throw new BalanceNotSufficentException("Balance is not enough for this transfer");
+        }
+    }
+
+    private boolean checkSenderBalance(Account sender, BigDecimal amount) {
+        //verify sender has enough balance to send
+        return sender.getBalance().subtract(amount).compareTo(BigDecimal.ZERO) >= 0;
+
     }
 
     private void checkAccountOwnership(Account sender, Account receiver) {

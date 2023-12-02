@@ -4,10 +4,12 @@ import com.cydeo.enums.AccountType;
 import com.cydeo.exception.AccountOwnershipException;
 import com.cydeo.exception.BadRequestException;
 import com.cydeo.exception.BalanceNotSufficentException;
+import com.cydeo.exception.UnderConstructionExeption;
 import com.cydeo.model.Account;
 import com.cydeo.model.Transaction;
 import com.cydeo.repository.AccountRepository;
 import com.cydeo.repository.TransactionRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -17,7 +19,8 @@ import java.util.UUID;
 
 @Component
 public class TransactionServiceImpl implements TransactionService {
-
+    @Value("${under_construction}")
+    private boolean underConstruction;
     private final AccountRepository accountRepository;
     private final TransactionRepository transactionRepository;
 
@@ -28,6 +31,8 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public Transaction makeTransfer(Account sender, Account receiver, BigDecimal amount, Date creationDate, String message) {
+        if (!underConstruction) {
+
         /*
                -if sender or receiver is null ?
                -if sender and receiver is the same account ?
@@ -35,17 +40,20 @@ public class TransactionServiceImpl implements TransactionService {
                -if both accounts are checking, if not, one of them saving, it needs to be same userId
          */
 
-        validateAccount(sender, receiver);
-        checkAccountOwnership(sender, receiver);
-        executeBalanceAndUpdateIfRequired(amount, sender, receiver);
+            validateAccount(sender, receiver);
+            checkAccountOwnership(sender, receiver);
+            executeBalanceAndUpdateIfRequired(amount, sender, receiver);
         /*
         after all validations are completed, and money is transferred, we need to create Transaction object and save/return it
          */
-        Transaction transaction = Transaction.builder().amount(amount).sender(sender.getId()).receiver(receiver.getId()).createDate(creationDate).message(message).build();
-        transactionRepository.save(transaction);
+            Transaction transaction = Transaction.builder().amount(amount).sender(sender.getId()).receiver(receiver.getId()).createDate(creationDate).message(message).build();
+            transactionRepository.save(transaction);
 
-        //make transfer
-        return null;
+            //make transfer
+            return null;
+        } else {
+            throw new UnderConstructionExeption("App is under construction, please try gain later");
+        }
     }
 
     private void executeBalanceAndUpdateIfRequired(BigDecimal amount, Account sender, Account receiver) {

@@ -2,9 +2,6 @@ package com.cydeo.service.impl;
 
 import com.cydeo.model.Account;
 import com.cydeo.model.Transaction;
-import com.example.banksimulationapplication.model.Account;
-import com.example.banksimulationapplication.model.Transaction;
-import com.example.banksimulationapplication.service.TransactionService;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;

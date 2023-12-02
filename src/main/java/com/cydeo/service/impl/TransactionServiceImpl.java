@@ -7,6 +7,7 @@ import com.cydeo.exception.BalanceNotSufficentException;
 import com.cydeo.model.Account;
 import com.cydeo.model.Transaction;
 import com.cydeo.repository.AccountRepository;
+import com.cydeo.repository.TransactionRepository;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -18,9 +19,11 @@ import java.util.UUID;
 public class TransactionServiceImpl implements TransactionService {
 
     private final AccountRepository accountRepository;
+    private final TransactionRepository transactionRepository;
 
-    public TransactionServiceImpl(AccountRepository accountRepository) {
+    public TransactionServiceImpl(AccountRepository accountRepository, TransactionRepository transactionRepository) {
         this.accountRepository = accountRepository;
+        this.transactionRepository = transactionRepository;
     }
 
     @Override
@@ -35,6 +38,11 @@ public class TransactionServiceImpl implements TransactionService {
         validateAccount(sender, receiver);
         checkAccountOwnership(sender, receiver);
         executeBalanceAndUpdateIfRequired(amount, sender, receiver);
+        /*
+        after all validations are completed, and money is transferred, we need to create Transaction object and save/return it
+         */
+        Transaction transaction = Transaction.builder().amount(amount).sender(sender.getId()).receiver(receiver.getId()).createDate(creationDate).message(message).build();
+        transactionRepository.save(transaction);
 
         //make transfer
         return null;

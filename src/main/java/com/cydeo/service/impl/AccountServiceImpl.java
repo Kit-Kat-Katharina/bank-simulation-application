@@ -1,5 +1,6 @@
 package com.cydeo.service.impl;
 
+import com.cydeo.enums.AccountStatus;
 import com.cydeo.enums.AccountType;
 import com.cydeo.model.Account;
 import com.cydeo.repository.AccountRepository;
@@ -21,7 +22,7 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Account createNewAccount(BigDecimal balance, Date createDate, AccountType accountType, Long userId) {
         //we need to create Account object
-        Account account = Account.builder().id(UUID.randomUUID()).userId(userId).accountType(accountType).creationDate(createDate).balance(balance).build();
+        Account account = Account.builder().id(UUID.randomUUID()).userId(userId).accountType(accountType).creationDate(createDate).balance(balance).accountStatus(AccountStatus.ACTIVE).build();
         //save into the dataBase(repository)
         //return the object created
         return  accountRepository.save(account);

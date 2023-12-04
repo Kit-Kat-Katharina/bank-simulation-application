@@ -17,7 +17,7 @@ public class BankSimulationApplication {
     public static void main(String[] args) {
 
         ApplicationContext container = SpringApplication.run(BankSimulationApplication.class, args);
-//
+
 //        //get account and transaction service beans
 //        AccountService accountService = container.getBean(AccountService.class);
 //        TransactionService transactionService = container.getBean(TransactionService.class);

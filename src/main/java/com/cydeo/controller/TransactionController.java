@@ -28,15 +28,15 @@ public class TransactionController {
 
 
     @GetMapping("/make-transfer")
-    public String getMakeTransfer(Model model){
+    public String getMakeTransfer(Model model) {
 
         //what we need to provide to make transfer happen
         //we need to provide empty transaction object
         model.addAttribute("transaction", Transaction.builder().build());
         //we need to provide list of all accounts
-        model.addAttribute("accounts",accountService.listAllAccount());
+        model.addAttribute("accounts", accountService.listAllAccount());
         //we need list of last 10 transactions to fill the table(business logic is missing)
-        model.addAttribute("lastTransactions",transactionService.last10Transactions());
+        model.addAttribute("lastTransactions", transactionService.last10Transactions());
         return "transaction/make-transfer";
     }
 
@@ -44,11 +44,11 @@ public class TransactionController {
     //complete the transfer and return the same page
 
     @PostMapping("/transfer")
-    public String makeTransfer(@ModelAttribute("transaction") Transaction transaction, BindingResult bindingResult, Model model){
+    public String makeTransfer(@ModelAttribute("transaction") Transaction transaction, BindingResult bindingResult, Model model) {
 
-        if(bindingResult.hasErrors()){
-            model.addAttribute("accounts",accountService.listAllAccount());
-            model.addAttribute("lastTransactions",transactionService.last10Transactions());
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("accounts", accountService.listAllAccount());
+            model.addAttribute("lastTransactions", transactionService.last10Transactions());
             return "transaction/make-transfer";
         }
 
@@ -56,23 +56,18 @@ public class TransactionController {
         //I need to find the Accounts based on the ID that I have and use as a parameter to complete makeTransfer method.
         Account sender = accountService.retrieveById(transaction.getSender());
         Account receiver = accountService.retrieveById(transaction.getReceiver());
-        transactionService.makeTransfer(sender,receiver,transaction.getAmount(),new Date(),transaction.getMessage());
+        transactionService.makeTransfer(sender, receiver, transaction.getAmount(), new Date(), transaction.getMessage());
 
         return "redirect:/make-transfer";
     }
 
-    //TASK 5 MIN
-    //write a method, that gets the account id from index.html and print on the console.
-    //(work on index.html and here)
-    //transaction/{id}
-    //return transaction/transactions page
-@GetMapping("/transaction/{id}")
-    public String getTransactionList(@PathVariable("id")UUID id){
-    System.out.println(id);
-    return  "transaction/transactions";
-}
 
-    //go to transactions.html
-    //based on size of the transactions either show "No transactions yet" or transactions table
+    @GetMapping("/transaction/{id}")
+    public String getTransactionList(@PathVariable("id") UUID id, Model model) {
+        System.out.println(id);
+        model.addAttribute("transactions", transactionService.findTransactionListById(id));
+
+        return "transaction/transactions";
+    }
 
 }

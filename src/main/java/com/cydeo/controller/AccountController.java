@@ -3,8 +3,10 @@ package com.cydeo.controller;
 import com.cydeo.enums.AccountType;
 import com.cydeo.model.Account;
 import com.cydeo.service.AccountService;
+import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -38,9 +40,14 @@ public class AccountController {
     }
 
     @PostMapping("/create")
-    public String postCreate(@ModelAttribute("account") Account account) {
+    public String createAccount(@Valid @ModelAttribute("account") Account account, BindingResult bindingResult,Model model){
+        if(bindingResult.hasErrors()){
+
+            model.addAttribute("accountTypes", AccountType.values());
+            return "account/create-account";
+        }
         System.out.println(account);
-        accountService.createNewAccount(account.getBalance(), new Date(), account.getAccountType(), account.getUserId());
+        accountService.createNewAccount(account.getBalance(),new Date(),account.getAccountType(),account.getUserId());
         return "redirect:/index";
     }
     @GetMapping("/delete/{id}")
@@ -49,7 +56,7 @@ public class AccountController {
         return "redirect:/index";
     }
     @GetMapping("/activate/{id}")
-    public String activateAccunt(@PathVariable("id") UUID id){
+    public String activateAccount(@PathVariable("id") UUID id){
         accountService.activateAccount(id);
         return "redirect:/index";
 }

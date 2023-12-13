@@ -4,6 +4,7 @@ import com.cydeo.model.Account;
 import com.cydeo.model.Transaction;
 import com.cydeo.service.AccountService;
 import com.cydeo.service.impl.TransactionService;
+import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -44,7 +45,7 @@ public class TransactionController {
     //complete the transfer and return the same page
 
     @PostMapping("/transfer")
-    public String makeTransfer(@ModelAttribute("transaction") Transaction transaction, BindingResult bindingResult, Model model) {
+    public String makeTransfer(@Valid @ModelAttribute("transaction") Transaction transaction, BindingResult bindingResult, Model model) {
 
         if (bindingResult.hasErrors()) {
             model.addAttribute("accounts", accountService.listAllAccount());
@@ -69,5 +70,4 @@ public class TransactionController {
 
         return "transaction/transactions";
     }
-
 }

@@ -50,11 +50,10 @@ public class TransactionServiceImpl implements TransactionService {
         /*
         after all validations are completed, and money is transferred, we need to create Transaction object and save/return it
          */
-            TransactionDTO transactionDTO = new TransactionDTO();
-            transactionRepository.save(transactionDTO);
+            TransactionDTO transactionDTO = new TransactionDTO(sender, receiver, amount,message,creationDate);
 
-            //make transfer
-            return null;
+             transactionRepository.save(transactionMapper.convertToEntity(transactionDTO));
+             return  transactionDTO;
         } else {
             throw new UnderConstructionExeption("App is under construction, please try gain later");
         }
@@ -67,7 +66,7 @@ public class TransactionServiceImpl implements TransactionService {
             receiver.setBalance(receiver.getBalance().add(amount));
            AccountDTO senderAcc = accountService.retrieveById(sender.getId());
            senderAcc.setBalance(sender.getBalance());
-            accountService.updateAccount(sender);
+            accountService.updateAccount(senderAcc);
         } else {
             throw new BalanceNotSufficentException("Balance is not enough for this transfer");
         }

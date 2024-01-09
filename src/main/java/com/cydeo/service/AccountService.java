@@ -13,10 +13,12 @@ public interface AccountService {
     List<AccountDTO> listAllAccount();
 
     void deleteAccount(Long id);
+
     void activateAccount(Long id);
 
     AccountDTO retrieveById(Long id);
 
     List<AccountDTO> listAllActiveAccount();
+
     void updateAccount(AccountDTO accountDTO);
 }

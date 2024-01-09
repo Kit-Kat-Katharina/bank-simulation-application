@@ -33,7 +33,7 @@ public class AccountController {
     @GetMapping("/create-form")
     public String getCreateForm(Model model) {
         //we need to provide empty account project
-        model.addAttribute("account", new AccountDTO());
+        model.addAttribute("accountDTO", new AccountDTO());
         //we need to provide accountType enum information
         model.addAttribute("accountTypes", AccountType.values());
         return "account/create-account";

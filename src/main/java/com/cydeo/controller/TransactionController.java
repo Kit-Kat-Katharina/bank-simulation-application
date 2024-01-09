@@ -3,7 +3,7 @@ package com.cydeo.controller;
 import com.cydeo.dto.AccountDTO;
 import com.cydeo.dto.TransactionDTO;
 import com.cydeo.service.AccountService;
-import com.cydeo.service.impl.TransactionService;
+import com.cydeo.service.TransactionService;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -26,13 +26,12 @@ public class TransactionController {
         this.transactionService = transactionService;
     }
 
-
     @GetMapping("/make-transfer")
     public String getMakeTransfer(Model model) {
 
         //what we need to provide to make transfer happen
         //we need to provide empty transaction object
-        model.addAttribute("transaction", new TransactionDTO());
+        model.addAttribute("transactionDTO", new TransactionDTO());
         //we need to provide list of all accounts
         model.addAttribute("accounts", accountService.listAllActiveAccount());
         //we need list of last 10 transactions to fill the table(business logic is missing)
@@ -42,9 +41,8 @@ public class TransactionController {
 
     //write a post method that takes transaction object from the UI
     //complete the transfer and return the same page
-
     @PostMapping("/transfer")
-    public String makeTransfer(@Valid @ModelAttribute("transaction") TransactionDTO transactionDTO, BindingResult bindingResult, Model model) {
+    public String makeTransfer(@Valid @ModelAttribute("transactionDTO") TransactionDTO transactionDTO, BindingResult bindingResult, Model model) {
 
         if (bindingResult.hasErrors()) {
             model.addAttribute("accounts", accountService.listAllAccount());
@@ -60,7 +58,6 @@ public class TransactionController {
 
         return "redirect:/make-transfer";
     }
-
 
     @GetMapping("/transaction/{id}")
     public String getTransactionList(@PathVariable("id") Long id, Model model) {

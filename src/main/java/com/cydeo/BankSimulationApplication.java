@@ -1,17 +1,12 @@
 package com.cydeo;
 
-import com.cydeo.dto.AccountDTO;
-import com.cydeo.enums.AccountType;
 import com.cydeo.service.AccountService;
-import com.cydeo.service.impl.TransactionService;
+import com.cydeo.service.TransactionService;
 import org.modelmapper.ModelMapper;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
-
-import java.math.BigDecimal;
-import java.util.Date;
 
 @SpringBootApplication
 public class BankSimulationApplication {

@@ -1,36 +1,40 @@
 package com.cydeo.service.impl;
 
+import com.cydeo.dto.AccountDTO;
+import com.cydeo.dto.TransactionDTO;
+import com.cydeo.entity.Transaction;
 import com.cydeo.enums.AccountType;
 import com.cydeo.exception.AccountOwnershipException;
 import com.cydeo.exception.BadRequestException;
 import com.cydeo.exception.BalanceNotSufficentException;
 import com.cydeo.exception.UnderConstructionExeption;
-import com.cydeo.model.Account;
-import com.cydeo.model.Transaction;
-import com.cydeo.repository.AccountRepository;
+import com.cydeo.mapper.TransactionMapper;
 import com.cydeo.repository.TransactionRepository;
+import com.cydeo.service.AccountService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Component
 public class TransactionServiceImpl implements TransactionService {
     @Value("${under_construction}")
     private boolean underConstruction;
-    private final AccountRepository accountRepository;
+    private final AccountService accountService;
     private final TransactionRepository transactionRepository;
+    private final TransactionMapper transactionMapper;
 
-    public TransactionServiceImpl(AccountRepository accountRepository, TransactionRepository transactionRepository) {
-        this.accountRepository = accountRepository;
+    public TransactionServiceImpl(AccountService accountService, TransactionRepository transactionRepository, TransactionMapper transactionMapper) {
+        this.accountService = accountService;
         this.transactionRepository = transactionRepository;
+        this.transactionMapper = transactionMapper;
     }
 
     @Override
-    public Transaction makeTransfer(Account sender, Account receiver, BigDecimal amount, Date creationDate, String message) {
+    public TransactionDTO makeTransfer(AccountDTO sender, AccountDTO receiver, BigDecimal amount, Date creationDate, String message) {
         if (!underConstruction) {
 
         /*
@@ -46,8 +50,8 @@ public class TransactionServiceImpl implements TransactionService {
         /*
         after all validations are completed, and money is transferred, we need to create Transaction object and save/return it
          */
-            Transaction transaction = Transaction.builder().amount(amount).sender(sender.getId()).receiver(receiver.getId()).createDate(creationDate).message(message).build();
-            transactionRepository.save(transaction);
+            TransactionDTO transactionDTO = new TransactionDTO();
+            transactionRepository.save(transactionDTO);
 
             //make transfer
             return null;
@@ -56,23 +60,26 @@ public class TransactionServiceImpl implements TransactionService {
         }
     }
 
-    private void executeBalanceAndUpdateIfRequired(BigDecimal amount, Account sender, Account receiver) {
+    private void executeBalanceAndUpdateIfRequired(BigDecimal amount, AccountDTO sender, AccountDTO receiver) {
         if (checkSenderBalance(sender, amount)) {
             //update sender & receiver balance
             sender.setBalance(sender.getBalance().subtract(amount));
             receiver.setBalance(receiver.getBalance().add(amount));
+           AccountDTO senderAcc = accountService.retrieveById(sender.getId());
+           senderAcc.setBalance(sender.getBalance());
+            accountService.updateAccount(sender);
         } else {
             throw new BalanceNotSufficentException("Balance is not enough for this transfer");
         }
     }
 
-    private boolean checkSenderBalance(Account sender, BigDecimal amount) {
+    private boolean checkSenderBalance(AccountDTO sender, BigDecimal amount) {
         //verify sender has enough balance to send
         return sender.getBalance().subtract(amount).compareTo(BigDecimal.ZERO) >= 0;
 
     }
 
-    private void checkAccountOwnership(Account sender, Account receiver) {
+    private void checkAccountOwnership(AccountDTO sender, AccountDTO receiver) {
         /*
         write an if statement that checks if one of the accounts is saving, and user of sender is not the same , throw AccountOwnership exception
          */
@@ -82,7 +89,7 @@ public class TransactionServiceImpl implements TransactionService {
         }
     }
 
-    private void validateAccount(Account sender, Account receiver) {
+    private void validateAccount(AccountDTO sender, AccountDTO receiver) {
         /*
             -if any of the account is null
             -if account ids are the same(same account)
@@ -100,23 +107,27 @@ public class TransactionServiceImpl implements TransactionService {
         findAccountById(receiver.getId());
     }
 
-    private void findAccountById(UUID id) {
+    private void findAccountById(Long id) {
 
-        accountRepository.findById(id);
+        accountService.retrieveById(id);
     }
 
     @Override
-    public List<Transaction> findAllTransaction() {
-        return transactionRepository.findAll();
+    public List<TransactionDTO> findAllTransaction() {
+        return transactionRepository.findAll().stream().map(transactionMapper::convertToDTO).collect(Collectors.toList());
     }
 
     @Override
-    public List<Transaction> last10Transactions() {
-        return transactionRepository.findLast10Transactions();
+    public List<TransactionDTO> last10Transactions() {
+        List<Transaction> las10Transactions = transactionRepository.findLast10Transactions();
+
+        return transactionRepository.findLast10Transactions().stream().map(transactionMapper::convertToDTO).collect(Collectors.toList());
     }
 
     @Override
-    public List<Transaction> findTransactionListById(UUID id) {
-        return transactionRepository.findTransactionListByAccountId(id);
+    public List<TransactionDTO> findTransactionListById(Long id) {
+
+        List<Transaction> transactionList = transactionRepository.findTransactionListByAccountId(id);
+        return transactionList.stream().map(transactionMapper::convertToDTO).collect(Collectors.toList());
     }
 }

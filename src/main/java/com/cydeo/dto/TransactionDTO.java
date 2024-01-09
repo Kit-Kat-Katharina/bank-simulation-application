@@ -1,25 +1,24 @@
-package com.cydeo.model;
+package com.cydeo.dto;
 
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
-import jdk.jfr.StackTrace;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.util.Date;
-import java.util.UUID;
-@Data
-@Builder
-public class Transaction {
-    @NotNull
-    private UUID sender;
-    @NotNull
-    private UUID receiver;
+
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+public class TransactionDTO {
+   //@NotNull
+    private AccountDTO sender;
+    //@NotNull
+    private AccountDTO receiver;
     @Positive
-    @NotNull
+   // @NotNull
     private BigDecimal amount;
     @Size(min=2,max =250)
     @Pattern(regexp = "^[a-zA-Z0-9]*$")
